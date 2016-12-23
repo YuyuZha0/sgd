@@ -27,6 +27,10 @@ public final class ImmutableVector implements Serializable {
         return value[index];
     }
 
+    public int dimension() {
+        return value.length;
+    }
+
     public double[] toArray() {
         return Arrays.copyOf(value, value.length);
     }

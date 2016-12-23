@@ -105,7 +105,7 @@ public final class GradientDescent {
         long st = System.currentTimeMillis();
         DoubleMatrix theta = new DoubleMatrix(dimension + 1, 1);
         DoubleMatrix lastError = null;
-        double rate = learningRate;
+        double eta = learningRate;
         for (int i = 0; i < iterations; i++) {
             LabeledPoint[] samples = sample();
             DoubleMatrix x = getX(samples, dimension);
@@ -123,8 +123,8 @@ public final class GradientDescent {
                     .transpose()
                     .mmul(error)
                     .add(noiseUpdater.update(theta, noiseParam));
-            theta = theta.sub(delta.mmul(rate / x.getRows()));
-            rate = learningRateUpdater.update(learningRate, theta);
+            theta = theta.sub(delta.mmul(eta / x.getRows()));
+            eta = learningRateUpdater.update(learningRate, theta);
         }
         logger.info("training finished,durations:[{}]ms", System.currentTimeMillis() - st);
 
