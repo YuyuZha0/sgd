@@ -62,7 +62,7 @@ public final class LabeledPoint implements Serializable {
     }
 
     public static void main(String[] args) {
-        List<Feature> features = Arrays.asList(Feature.newInstance(1, 2), Feature.newInstance(2, 1.5f), Feature.newInstance(1, 3));
+        List<Feature> features = Arrays.asList(Feature.of(1, 2), Feature.of(2, 1.5f), Feature.of(1, 3));
         System.out.println(LabeledPoint.newInstance(1, features));
     }
 

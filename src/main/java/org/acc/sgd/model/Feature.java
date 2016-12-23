@@ -25,7 +25,7 @@ public final class Feature implements Comparable<Feature>, Serializable {
         this.weight = weight;
     }
 
-    public static Feature newInstance(int index, float weight) {
+    public static Feature of(int index, float weight) {
         Preconditions.checkArgument(index > 0, "index is 1-based");
         return new Feature(index, weight);
     }

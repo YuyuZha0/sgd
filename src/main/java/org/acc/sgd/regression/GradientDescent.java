@@ -3,11 +3,14 @@ package org.acc.sgd.regression;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import org.acc.sgd.model.LabeledPoint;
+import org.acc.sgd.model.ResultModel;
 import org.jblas.DoubleMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zhaoyy on 2016/11/23.
@@ -84,7 +87,6 @@ public final class GradientDescent {
         double delta = error
                 .sub(lastError)
                 .normmax();
-        System.out.println(delta);
         return delta < epsilon;
     }
 
@@ -96,10 +98,11 @@ public final class GradientDescent {
         return points;
     }
 
-    public double[] run() {
+    public ResultModel run() {
 
         logger.info("start running gradient descent...");
 
+        long st = System.currentTimeMillis();
         DoubleMatrix theta = new DoubleMatrix(dimension + 1, 1);
         DoubleMatrix lastError = null;
         double rate = learningRate;
@@ -121,11 +124,11 @@ public final class GradientDescent {
                     .mmul(error)
                     .add(noiseUpdater.update(theta, noiseParam));
             theta = theta.sub(delta.mmul(rate / x.getRows()));
-            System.out.println("theta:" + theta);
             rate = learningRateUpdater.update(learningRate, theta);
         }
+        logger.info("traing finished,durations:[{}]ms", System.currentTimeMillis() - st);
 
-        return theta.toArray();
+        return new ResultModel(theta.toArray());
     }
 
     public static class Builder {
@@ -196,20 +199,22 @@ public final class GradientDescent {
 
         @Override
         public String toString() {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("learningRate", learningRate);
+            map.put("iterations", iterations);
+            map.put("batchSize", batchSize);
+            map.put("noiseParam", noiseParam);
+            map.put("epsilon", epsilon);
+            map.put("sampler", sampler);
+            map.put("hypothesis", hypothesis);
+            map.put("learningRateUpdater", learningRateUpdater);
+            map.put("noiseUpdater", noiseUpdater);
             StringBuilder builder = new StringBuilder();
-            builder
-                    .append("\n\tlearningRate:")
-                    .append(learningRate)
-                    .append("\n\titerations:")
-                    .append(iterations)
-                    .append("\n\tsampler:")
-                    .append(sampler)
-                    .append("\n\tlearningRateUpdater:")
-                    .append(learningRateUpdater)
-                    .append("\n\tnoiseUpdater:")
-                    .append(noiseUpdater)
-                    .append('\n');
-
+            map.forEach((k, v) -> builder
+                    .append("\n\t")
+                    .append(k)
+                    .append(':')
+                    .append(v));
             return builder.toString();
         }
 
