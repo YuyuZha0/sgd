@@ -126,7 +126,7 @@ public final class GradientDescent {
             theta = theta.sub(delta.mmul(rate / x.getRows()));
             rate = learningRateUpdater.update(learningRate, theta);
         }
-        logger.info("traing finished,durations:[{}]ms", System.currentTimeMillis() - st);
+        logger.info("training finished,durations:[{}]ms", System.currentTimeMillis() - st);
 
         return new ResultModel(theta.toArray());
     }

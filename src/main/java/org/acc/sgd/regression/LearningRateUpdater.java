@@ -9,10 +9,10 @@ public enum LearningRateUpdater {
 
     CONST {
         @Override
-        public double update(double initValue, DoubleMatrix weights) {
+        public double update(double initValue, DoubleMatrix theta) {
             return initValue;
         }
     };
 
-    public abstract double update(double initValue, DoubleMatrix weights);
+    public abstract double update(double initValue, DoubleMatrix theta);
 }
