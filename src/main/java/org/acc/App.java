@@ -25,9 +25,9 @@ public class App {
                 .batchSize(100)
                 .epsilon(0.01)
                 .learningRateUpdater(LearningRateUpdater.CONST)
-                .noiseUpdater(NoiseUpdater.ELASTIC_NET, 0.8)
+                .noiseUpdater(NoiseUpdater.NONE, 0.8)
                 .sampler(Sampler.RANDOM)
-                .hypothesis(Hypothesis.LOGISTIC)
+                .hypothesis(Hypothesis.LINEAR)
                 .build(samples);
 
         ResultModel model = gradientDescent.run();
@@ -45,9 +45,9 @@ public class App {
     }
 
     private static LabeledPoint randomLabel() {
-        double x = (Math.random() - 0.5) * 20;
-        double y = (Math.random() - 0.5) * 20;
-        double label = 10 * x - 5 * y + 7 > 0 ? 1 : 0;
+        double x = Math.random();
+        double y = Math.random();
+        double label = 2 * x + 6 * y + 1;
         return LabeledPoint.newInstance((float) label, Arrays.asList(Feature.of(1, (float) x), Feature.of(2, (float) y)));
     }
 }

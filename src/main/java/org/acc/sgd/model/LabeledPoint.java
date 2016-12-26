@@ -140,4 +140,57 @@ public final class LabeledPoint implements Serializable {
         return product;
     }
 
+    public LabeledPoint scale(FeatureScaling scaling) {
+        return scaling.scale(this);
+    }
+
+    public enum FeatureScaling {
+
+        NONE {
+            @Override
+            public LabeledPoint scale(LabeledPoint point) {
+                return point;
+            }
+        }, MIN_MAX_INCLUDE_LABEL {
+            @Override
+            public LabeledPoint scale(LabeledPoint point) {
+                float l = point.label;
+                Feature[] f1 = point.features;
+                float min = 0, max = 0;
+                for (Feature f : f1) {
+                    float w = f.getWeight();
+                    min = Math.min(min, w);
+                    max = Math.max(max, max);
+                }
+                float b = Math.max(Math.abs(max - min), 1);
+                Feature[] f2 = new Feature[f1.length];
+                for (int i = 0; i < f2.length; i++) {
+                    Feature f = Feature.of(f1[i].getIndex(), (f1[i].getWeight() - min) / b);
+                    f2[i] = f;
+                }
+                return new LabeledPoint((l - min) / b, f2);
+            }
+        }, MIN_MAX_EXCLUDE_LABEL {
+            @Override
+            public LabeledPoint scale(LabeledPoint point) {
+                Feature[] f1 = point.features;
+                float min = 0, max = 0;
+                for (Feature f : f1) {
+                    float w = f.getWeight();
+                    min = Math.min(min, w);
+                    max = Math.max(max, max);
+                }
+                float b = Math.max(Math.abs(max - min), 1);
+                Feature[] f2 = new Feature[f1.length];
+                for (int i = 0; i < f2.length; i++) {
+                    Feature f = Feature.of(f1[i].getIndex(), (f1[i].getWeight() - min) / b);
+                    f2[i] = f;
+                }
+                return new LabeledPoint(point.label, f2);
+            }
+        };
+
+        public abstract LabeledPoint scale(LabeledPoint point);
+    }
+
 }

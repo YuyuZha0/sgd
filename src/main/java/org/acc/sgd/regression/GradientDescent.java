@@ -81,13 +81,13 @@ public final class GradientDescent {
         return new DoubleMatrix(label);
     }
 
-    private static boolean checkConvergence(DoubleMatrix error, DoubleMatrix lastError, double epsilon) {
+    private static double epsilon(DoubleMatrix error, DoubleMatrix lastError) {
         if (lastError == null)
-            return false;
+            return 9999;
         double delta = error
                 .sub(lastError)
                 .normmax();
-        return delta < epsilon;
+        return delta;
     }
 
     private LabeledPoint[] sample() {
@@ -106,6 +106,7 @@ public final class GradientDescent {
         DoubleMatrix theta = new DoubleMatrix(dimension + 1, 1);
         DoubleMatrix lastError = null;
         double eta = learningRate;
+        double epsilon = this.epsilon;
         for (int i = 0; i < iterations; i++) {
             LabeledPoint[] samples = sample();
             DoubleMatrix x = getX(samples, dimension);
@@ -113,7 +114,7 @@ public final class GradientDescent {
             DoubleMatrix error = hypothesis
                     .apply(x, theta)
                     .sub(label);
-            if (checkConvergence(error, lastError, epsilon)) {
+            if ((epsilon = epsilon(error, lastError)) < this.epsilon) {
                 logger.info("iteration ended beforehand,total iteration [{}]", i);
                 break;
             } else {
@@ -126,7 +127,7 @@ public final class GradientDescent {
             theta = theta.sub(delta.mmul(eta / x.getRows()));
             eta = learningRateUpdater.update(learningRate, theta);
         }
-        logger.info("training finished,durations:[{}]ms", System.currentTimeMillis() - st);
+        logger.info("training finished,current epsilon:[{}],duration:[{}]ms", epsilon, System.currentTimeMillis() - st);
 
         return new ResultModel(theta.toArray());
     }
