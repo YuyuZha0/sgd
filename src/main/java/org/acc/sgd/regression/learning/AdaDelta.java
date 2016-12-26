@@ -34,7 +34,7 @@ public final class AdaDelta implements LearningRateUpdater {
     public double nextLearningRate(int iteration, DoubleMatrix gradient) {
         gradient.checkColumns(1);
         n = rho * n + (1 - rho) * gradient.dot(gradient);
-        return 1 / Math.sqrt(n + epsilon);
+        return initValue / Math.sqrt(n + epsilon);
     }
 
     @Override
