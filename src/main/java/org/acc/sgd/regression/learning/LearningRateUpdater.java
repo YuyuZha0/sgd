@@ -7,5 +7,10 @@ import org.jblas.DoubleMatrix;
  */
 public interface LearningRateUpdater {
 
-    double nextRate(double initValue, DoubleMatrix theta);
+    /**
+     * @param iteration iteration is 0-based
+     * @param gradient
+     * @return
+     */
+    double nextLearningRate(int iteration, DoubleMatrix gradient);
 }

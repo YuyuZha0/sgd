@@ -21,7 +21,6 @@ public final class GradientDescent {
 
     protected static final Logger logger = LoggerFactory.getLogger(GradientDescent.class);
 
-    private final double learningRate;
     private final int iterations;
     private final Sampler sampler;
     private final LearningRateUpdater learningRateUpdater;
@@ -34,7 +33,6 @@ public final class GradientDescent {
 
     private GradientDescent(Builder builder, ImmutableList<LabeledPoint> samples) {
         logger.info("init gradient descent model with params:{}", builder);
-        this.learningRate = builder.learningRate;
         this.iterations = builder.iterations;
         this.batchSize = builder.batchSize;
         this.sampler = builder.sampler;
@@ -56,7 +54,7 @@ public final class GradientDescent {
         for (LabeledPoint point : points) {
             //index is 1-based
             int index = point.maxIndex();
-            dimension = dimension < index ? index : dimension;
+            dimension = Math.max(index, dimension);
         }
         return dimension;
     }
@@ -81,6 +79,13 @@ public final class GradientDescent {
         return new DoubleMatrix(label);
     }
 
+    private static DoubleMatrix randomInitTheta(int dimension) {
+        double[] n = new double[dimension];
+        for (int i = 0; i < n.length; i++)
+            n[i] = Math.random() - 0.5;
+        return new DoubleMatrix(n);
+    }
+
     private static double epsilon(DoubleMatrix error, DoubleMatrix lastError) {
         if (lastError == null)
             return 9999;
@@ -103,9 +108,8 @@ public final class GradientDescent {
         logger.info("start running gradient descent...");
 
         long st = System.currentTimeMillis();
-        DoubleMatrix theta = new DoubleMatrix(dimension + 1, 1);
+        DoubleMatrix theta = randomInitTheta(dimension + 1);
         DoubleMatrix lastError = null;
-        double eta = learningRate;
         double epsilon = this.epsilon;
         for (int i = 0; i < iterations; i++) {
             LabeledPoint[] samples = sample();
@@ -124,8 +128,8 @@ public final class GradientDescent {
                     .transpose()
                     .mmul(error)
                     .add(noiseUpdater.noiseOf(theta));
-            theta = theta.sub(delta.mmul(eta / x.getRows()));
-            eta = learningRateUpdater.nextRate(learningRate, theta);
+            double learningRate = learningRateUpdater.nextLearningRate(i, delta);
+            theta = theta.sub(delta.mmul(learningRate));
         }
         logger.info("training finished,current epsilon:[{}],duration:[{}]ms", epsilon, System.currentTimeMillis() - st);
 
@@ -134,7 +138,6 @@ public final class GradientDescent {
 
     public static class Builder {
 
-        private double learningRate = 0;
         private int iterations = 0;
         private int batchSize = 10;
         private double epsilon = 0.1;
@@ -142,11 +145,6 @@ public final class GradientDescent {
         private Hypothesis hypothesis = null;
         private LearningRateUpdater learningRateUpdater = null;
         private NoiseUpdater noiseUpdater = null;
-
-        public Builder learningRate(double learningRate) {
-            this.learningRate = learningRate;
-            return this;
-        }
 
         public Builder epsilon(double epsilon) {
             this.epsilon = epsilon;
@@ -185,7 +183,6 @@ public final class GradientDescent {
 
 
         private void check() {
-            Preconditions.checkArgument(learningRate > 0, "learning rate must be a positive number");
             Preconditions.checkArgument(iterations > 0, "iterations must be a positive number");
             Preconditions.checkArgument(batchSize > 0, "batchSize must be a positive number");
             Preconditions.checkArgument(epsilon > 0, "epsilon must be a positive number");
@@ -198,7 +195,6 @@ public final class GradientDescent {
         @Override
         public String toString() {
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("learningRate", learningRate);
             map.put("iterations", iterations);
             map.put("batchSize", batchSize);
             map.put("epsilon", epsilon);

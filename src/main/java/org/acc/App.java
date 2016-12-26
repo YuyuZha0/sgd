@@ -8,7 +8,7 @@ import org.acc.sgd.regression.GradientDescent;
 import org.acc.sgd.regression.Hypothesis;
 import org.acc.sgd.regression.Sampler;
 import org.acc.sgd.regression.learning.ConstLearningRateUpdater;
-import org.acc.sgd.regression.noise.ElasticNet;
+import org.acc.sgd.regression.noise.ConstNoiseUpdater;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,14 +24,13 @@ public class App {
 
         GradientDescent gradientDescent = GradientDescent
                 .newGradientDescent()
-                .learningRate(0.1)
-                .iterations(1000)
+                .iterations(500)
                 .batchSize(100)
                 .epsilon(0.01)
-                .learningRateUpdater(new ConstLearningRateUpdater())
-                .noiseUpdater(new ElasticNet(0.8))
+                .learningRateUpdater(new ConstLearningRateUpdater(0.01))
+                .noiseUpdater(new ConstNoiseUpdater())
                 .sampler(Sampler.RANDOM)
-                .hypothesis(Hypothesis.LINEAR)
+                .hypothesis(Hypothesis.LOGISTIC)
                 .build(samples);
 
         ResultModel model = gradientDescent.run();
@@ -51,7 +50,7 @@ public class App {
     private static LabeledPoint randomLabel() {
         double x = Math.random();
         double y = Math.random();
-        double label = 2 * x + 6 * y + 1;
+        double label = 1 * x - 2 * y > 0 ? 1 : 0;
         return LabeledPoint.newInstance((float) label, Arrays.asList(Feature.of(1, (float) x), Feature.of(2, (float) y)));
     }
 }

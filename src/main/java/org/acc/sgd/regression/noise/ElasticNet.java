@@ -29,7 +29,7 @@ public final class ElasticNet implements NoiseUpdater {
 
     @Override
     public String toString() {
-        String name = ElasticNet.class.getName();
+        String name = "ElasticNet";
         return name + "[" + alpha + "]";
     }
 }
