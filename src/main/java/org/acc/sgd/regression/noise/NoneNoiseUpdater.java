@@ -5,7 +5,7 @@ import org.jblas.DoubleMatrix;
 /**
  * Created by zhaoyy on 2016/12/26.
  */
-public final class ConstNoiseUpdater implements NoiseUpdater {
+public final class NoneNoiseUpdater implements NoiseUpdater {
     @Override
     public DoubleMatrix noiseOf(DoubleMatrix theta) {
         theta.checkColumns(1);
@@ -14,6 +14,6 @@ public final class ConstNoiseUpdater implements NoiseUpdater {
 
     @Override
     public String toString() {
-        return "Const";
+        return "None";
     }
 }

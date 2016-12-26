@@ -7,8 +7,8 @@ import org.acc.sgd.model.ResultModel;
 import org.acc.sgd.regression.GradientDescent;
 import org.acc.sgd.regression.Hypothesis;
 import org.acc.sgd.regression.Sampler;
-import org.acc.sgd.regression.learning.ConstLearningRateUpdater;
-import org.acc.sgd.regression.noise.ConstNoiseUpdater;
+import org.acc.sgd.regression.learning.AdaDelta;
+import org.acc.sgd.regression.noise.NoneNoiseUpdater;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,15 +20,15 @@ import java.util.List;
 public class App {
 
     public static void main(String[] args) {
-        ImmutableList<LabeledPoint> samples = generateSamples(1000);
+        ImmutableList<LabeledPoint> samples = generateSamples(10000);
 
         GradientDescent gradientDescent = GradientDescent
                 .newGradientDescent()
                 .iterations(500)
                 .batchSize(100)
                 .epsilon(0.01)
-                .learningRateUpdater(new ConstLearningRateUpdater(0.01))
-                .noiseUpdater(new ConstNoiseUpdater())
+                .learningRateUpdater(new AdaDelta(0.01))
+                .noiseUpdater(new NoneNoiseUpdater())
                 .sampler(Sampler.RANDOM)
                 .hypothesis(Hypothesis.LOGISTIC)
                 .build(samples);
