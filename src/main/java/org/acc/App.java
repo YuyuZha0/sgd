@@ -4,7 +4,11 @@ import com.google.common.collect.ImmutableList;
 import org.acc.sgd.model.Feature;
 import org.acc.sgd.model.LabeledPoint;
 import org.acc.sgd.model.ResultModel;
-import org.acc.sgd.regression.*;
+import org.acc.sgd.regression.GradientDescent;
+import org.acc.sgd.regression.Hypothesis;
+import org.acc.sgd.regression.Sampler;
+import org.acc.sgd.regression.learning.ConstLearningRateUpdater;
+import org.acc.sgd.regression.noise.ElasticNet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,8 +28,8 @@ public class App {
                 .iterations(1000)
                 .batchSize(100)
                 .epsilon(0.01)
-                .learningRateUpdater(LearningRateUpdater.CONST)
-                .noiseUpdater(NoiseUpdater.NONE, 0.8)
+                .learningRateUpdater(new ConstLearningRateUpdater())
+                .noiseUpdater(new ElasticNet(0.8))
                 .sampler(Sampler.RANDOM)
                 .hypothesis(Hypothesis.LINEAR)
                 .build(samples);

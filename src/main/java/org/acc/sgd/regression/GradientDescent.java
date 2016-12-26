@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import org.acc.sgd.model.LabeledPoint;
 import org.acc.sgd.model.ResultModel;
+import org.acc.sgd.regression.learning.LearningRateUpdater;
+import org.acc.sgd.regression.noise.NoiseUpdater;
 import org.jblas.DoubleMatrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,6 @@ public final class GradientDescent {
     private final LearningRateUpdater learningRateUpdater;
     private final Hypothesis hypothesis;
     private final NoiseUpdater noiseUpdater;
-    private final double noiseParam;
     private final ImmutableList<LabeledPoint> samples;
     private final int dimension;
     private final int batchSize;
@@ -40,7 +41,6 @@ public final class GradientDescent {
         this.hypothesis = builder.hypothesis;
         this.learningRateUpdater = builder.learningRateUpdater;
         this.noiseUpdater = builder.noiseUpdater;
-        this.noiseParam = builder.noiseParam;
         this.epsilon = builder.epsilon;
         this.samples = samples;
         this.dimension = getDimension(samples);
@@ -123,9 +123,9 @@ public final class GradientDescent {
             DoubleMatrix delta = x
                     .transpose()
                     .mmul(error)
-                    .add(noiseUpdater.update(theta, noiseParam));
+                    .add(noiseUpdater.noiseOf(theta));
             theta = theta.sub(delta.mmul(eta / x.getRows()));
-            eta = learningRateUpdater.update(learningRate, theta);
+            eta = learningRateUpdater.nextRate(learningRate, theta);
         }
         logger.info("training finished,current epsilon:[{}],duration:[{}]ms", epsilon, System.currentTimeMillis() - st);
 
@@ -137,7 +137,6 @@ public final class GradientDescent {
         private double learningRate = 0;
         private int iterations = 0;
         private int batchSize = 10;
-        private double noiseParam = 0.8;
         private double epsilon = 0.1;
         private Sampler sampler = null;
         private Hypothesis hypothesis = null;
@@ -179,9 +178,8 @@ public final class GradientDescent {
             return this;
         }
 
-        public Builder noiseUpdater(NoiseUpdater noiseUpdater, double alpha) {
+        public Builder noiseUpdater(NoiseUpdater noiseUpdater) {
             this.noiseUpdater = noiseUpdater;
-            this.noiseParam = alpha;
             return this;
         }
 
@@ -190,12 +188,11 @@ public final class GradientDescent {
             Preconditions.checkArgument(learningRate > 0, "learning rate must be a positive number");
             Preconditions.checkArgument(iterations > 0, "iterations must be a positive number");
             Preconditions.checkArgument(batchSize > 0, "batchSize must be a positive number");
-            Preconditions.checkArgument(noiseParam >= 0 && noiseParam <= 1, "noiseParam must from 0 to 1");
             Preconditions.checkArgument(epsilon > 0, "epsilon must be a positive number");
             Preconditions.checkNotNull(sampler, "sampler can't be null");
             Preconditions.checkNotNull(hypothesis, "hypothesis can't be null");
-            Preconditions.checkNotNull(learningRateUpdater, "learning rate updater can't be null");
-            Preconditions.checkNotNull(noiseUpdater, "noise updater can't be null");
+            Preconditions.checkNotNull(learningRateUpdater, "learning rate noise can't be null");
+            Preconditions.checkNotNull(noiseUpdater, "noise noise can't be null");
         }
 
         @Override
@@ -204,7 +201,6 @@ public final class GradientDescent {
             map.put("learningRate", learningRate);
             map.put("iterations", iterations);
             map.put("batchSize", batchSize);
-            map.put("noiseParam", noiseParam);
             map.put("epsilon", epsilon);
             map.put("sampler", sampler);
             map.put("hypothesis", hypothesis);
